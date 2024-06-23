@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace sampleapi.Controllers
 {    
     [Route("api/files")]
+    [Authorize(Policy = "MustHavePhoneInRussia")]
     [ApiController]
     public class FilesController : ControllerBase
     {

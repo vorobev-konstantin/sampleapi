@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using sampleapi.Models;
@@ -8,6 +9,7 @@ using System.Text.Json;
 namespace sampleapi.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/user")]
     public class UserController : ControllerBase
     {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using sampleapi;
+using Microsoft.IdentityModel.Tokens;
 using sampleapi.DbContexts;
 using sampleapi.Services;
 using Serilog;
@@ -10,7 +10,6 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("logs/sampleapi.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
-
 
 var builder = WebApplication.CreateBuilder(args);
 //builder.Logging.ClearProviders();
@@ -48,6 +47,33 @@ builder.Services.AddTransient<IMailService, LocalMailService>();
 builder.Services.AddTransient<IMailService, CloudMailService>();
 #endif
 
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Authentication:Issuer"],
+            ValidAudience = builder.Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Convert.FromBase64String(builder.Configuration["Authentication:SecretForKey"]))
+        };
+    }
+    );
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MustHavePhoneInRussia", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireClaim("country", "Russia");
+    });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -65,6 +91,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

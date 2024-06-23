@@ -3,10 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace sampleapi.Models
 {
+        
     public class User
     {
+        private const string _russiaCodePhone = "+7";
+
         [Required]
-        [JsonPropertyName("id")]
+        [JsonPropertyName("id")]                
         public long Id { get; set; }
 
         [Required]
@@ -30,5 +33,13 @@ namespace sampleapi.Models
         [JsonPropertyName("phone")]
         [Phone(ErrorMessage = "Invalid phone.")]
         public string? Phone { get; set; }
+
+        [JsonPropertyName("country")]
+        public string? Country { 
+            get
+            {
+                return Phone is not null && Phone.StartsWith(_russiaCodePhone) ? "Russia" : null;
+            }
+        }
     }
 }
